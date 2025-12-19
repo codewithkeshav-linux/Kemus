@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Video Access</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Reset & Fonts */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f0c29;
+            background-image: linear-gradient(315deg, #0f0c29 0%, #302b63 74%, #24243e 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            /* Scrollbar hide karne ke liye */
+        }
+
+        /* --- Login Screen UI --- */
+        .login-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            /* Thoda dark overlay */
+            backdrop-filter: blur(8px);
+            z-index: 10;
+            transition: opacity 0.8s ease;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            width: 400px;
+            color: white;
+        }
+
+        .icon-lock {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #00d2ff;
+        }
+
+        h2 {
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #aaa;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            outline: none;
+            font-size: 1rem;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #00d2ff;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(to right, #00d2ff, #3a7bd5);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .error-text {
+            color: #ff4757;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+
+        /* --- Video Screen UI --- */
+        .video-container {
+            width: 90vw;
+            /* Screen ka 90% width (Badi display ke liye) */
+            max-width: 1600px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 1s ease;
+        }
+
+        .video-frame {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            /* Perfect 16:9 Ratio */
+            background: black;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.3);
+            /* Neon glow piche */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .branding {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 20px;
+            letter-spacing: 5px;
+            font-weight: bold;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container" id="loginScreen">
+        <div class="glass-card">
+            <div class="icon-lock"><i class="fas fa-lock"></i></div>
+            <h2>Restricted Access</h2>
+            <p>Enter passkey to watch the video</p>
+
+            <div class="input-group">
+                <input type="password" id="passwordInput" placeholder="Enter Password">
+                <button onclick="checkPassword()"><i class="fas fa-arrow-right"></i></button>
+            </div>
+            <p id="errorMsg" class="error-text"></p>
+        </div>
+    </div>
+
+    <div class="video-container hidden" id="videoScreen">
+        <div class="video-frame">
+            <video id="myVideo" controls>
+                <source src="./Assets/vid/dance.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="branding">KEMUS EXCLUSIVE</div>
+    </div>
+
+    <script>
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const loginScreen = document.getElementById('loginScreen');
+            const videoScreen = document.getElementById('videoScreen');
+            const errorMsg = document.getElementById('errorMsg');
+            const myVideo = document.getElementById('myVideo');
+
+            // Password Check Logic
+            if (password === "kemus") {
+                // 1. Error msg hatao
+                errorMsg.textContent = "";
+
+                // 2. Login screen ko fade out karo
+                loginScreen.style.opacity = "0";
+
+                // 3. Thodi der baad (0.8s) login screen gayab aur video visible
+                setTimeout(() => {
+                    loginScreen.style.display = "none";
+
+                    // Video section dikhao
+                    videoScreen.classList.remove("hidden");
+
+                    // Animation trigger karo (Fade in + Scale Up)
+                    setTimeout(() => {
+                        videoScreen.style.opacity = "1";
+                        videoScreen.style.transform = "scale(1)";
+
+                        // Video Auto Play start karo
+                        myVideo.play();
+                    }, 100);
+
+                }, 800);
+
+            } else {
+                // Galat password hone par
+                errorMsg.textContent = "Incorrect Password! Try 'kemus'";
+
+                // Shake animation effect input par (Optional cool feel)
+                const input = document.getElementById('passwordInput');
+                input.style.borderColor = "#ff4757";
+                setTimeout(() => { input.style.borderColor = "transparent"; }, 500);
+            }
+        }
+
+        // Enter key dabane par bhi kaam karega
+        document.getElementById("passwordInput").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                checkPassword();
+            }
+        });
+    </script>
+</body>
+
+</html>

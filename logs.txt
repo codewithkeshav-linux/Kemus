@@ -1,0 +1,5 @@
+    color Palete 
+rgba(149, 218, 74, 1) for green ;
+rgb(255, 227, 45) for yellow ;
+#ff392fcb for red ;
+rgb(252, 252, 210) fro Background;
